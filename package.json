@@ -1,0 +1,12 @@
+{
+  "name": "dacms-monorepo",
+  "private": true,
+  "scripts": {
+    "build": "cd client && npm run build",
+    "dev": "concurrently \"cd client && npm run dev\" \"cd api && npm run dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "nodemon": "^3.1.10"
+  }
+}

@@ -1,0 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fonts & small UI tweaks */
+body { font-family: 'Archivo', Arial, sans-serif; }

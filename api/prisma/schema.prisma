@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 Int        @id @default(autoincrement())
+  fullName           String
+  gender             String
+  dob                DateTime
+  governmentId       String     @unique
+  email              String     @unique
+  password           String
+  role               Role
+  isVerified         Boolean    @default(false)
+  otpCode            String?
+  otpExpiresAt       DateTime?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  // Relations
+  committeesLed      Committee[] @relation("CommitteeLeader")
+  committeesMemberOf  Committee[] @relation("CommitteeMembers")
+  projectsInitiated   Project[]   @relation("ProjectInitiator")
+  budgetsInitiated    Budget[]    @relation("BudgetInitiator")
+}
+
+model Committee {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  leaderId    Int?
+  leader      User?      @relation("CommitteeLeader", fields: [leaderId], references: [id])
+  members     User[]     @relation("CommitteeMembers")
+  projects    Project[]
+  createdAt   DateTime   @default(now())
+}
+
+model Project {
+  id              Int       @id @default(autoincrement())
+  name            String
+  description     String?
+  status          ProjectStatus @default(PENDING)
+  committeeId     Int?
+  committee       Committee? @relation(fields: [committeeId], references: [id])
+  initiatorId     Int?
+  initiator       User?      @relation("ProjectInitiator", fields: [initiatorId], references: [id])
+  budget          Budget?    @relation("ProjectBudget")
+  photoUrls       String[]
+  videoUrls       String[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Budget {
+  id              Int       @id @default(autoincrement())
+  title           String
+  amount          Float
+  status          BudgetStatus @default(PENDING)
+  initiatedById   Int?
+  initiatedBy     User?      @relation("BudgetInitiator", fields: [initiatedById], references: [id])
+  documentUrl     String?
+  projectId       Int?       @unique
+  project         Project?   @relation("ProjectBudget", fields: [projectId], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+enum Role {
+  ADMIN
+  COMMUNITY_LEADER
+  COMMITTEE_LEADER
+  COMMITTEE_MEMBER
+  LGA_OFFICER
+  COMMUNITY_MEMBER
+}
+
+enum ProjectStatus {
+  PENDING
+  APPROVED
+  DISPUTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum BudgetStatus {
+  PENDING
+  APPROVED
+  DISPUTED
+  RELEASED
+}
